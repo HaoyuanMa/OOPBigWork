@@ -31,7 +31,7 @@ public class GuideActivity extends Activity {
         decorView.setSystemUiVisibility(uiOptions);
         setContentView(R.layout.activity_guide);
         //定义一个用来打开MainActivity的Intent
-        Intent intent = new Intent(GuideActivity.this, MainActivity.class);
+        Intent intent = new Intent(GuideActivity.this, LoginActivity.class);
         //设置计时器，等待3s后启动活动
         Timer timer = new Timer();
         TimerTask tast = new TimerTask() {
