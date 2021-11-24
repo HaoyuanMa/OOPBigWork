@@ -20,6 +20,7 @@ import java.io.IOException;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private String user = "";
     private static final int LOGIN_SUCCESS = 1;
     private Handler resultHandler = new Handler(Looper.getMainLooper()){
         @Override
@@ -29,6 +30,7 @@ public class LoginActivity extends AppCompatActivity {
             if(msg.what == LOGIN_SUCCESS){
                 Intent intent = new Intent(LoginActivity.this, FaceInputActivity.class);
                 intent.putExtra("mode","login");
+                intent.putExtra("username",user);
                 startActivity(intent);
             }
         }
@@ -50,6 +52,7 @@ public class LoginActivity extends AppCompatActivity {
             public void run() {
                 EditText userName = findViewById(R.id.username);
                 EditText passWord = findViewById(R.id.password);
+                user = userName.getText().toString();
                 JSONObject jsonObject = new JSONObject();
                 try {
                     jsonObject.put("UserName",userName.getText().toString());
