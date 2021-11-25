@@ -55,13 +55,13 @@ public class LoginActivity extends AppCompatActivity {
                 user = userName.getText().toString();
                 JSONObject jsonObject = new JSONObject();
                 try {
-                    jsonObject.put("UserName",userName.getText().toString());
-                    jsonObject.put("PassWord",passWord.getText().toString());
+                    jsonObject.put("user_name",userName.getText().toString());
+                    jsonObject.put("pass_word",passWord.getText().toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
                 Request request = new Request.Builder()
-                        .url("")
+                        .url("http://"+Config.SERVER_HOST+":"+Config.SERVER_PORT+Config.LOGIN_URL)
                         .addHeader("Content-Type","application/json")
                         .addHeader("Data-Type","text")
                         .post(RequestBody.create(MediaType.parse("application/json;charset=utf-8"),jsonObject.toString()))
