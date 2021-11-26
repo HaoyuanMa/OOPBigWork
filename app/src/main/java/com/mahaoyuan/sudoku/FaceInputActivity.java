@@ -21,8 +21,14 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 
 import okhttp3.Call;
 import okhttp3.MediaType;
@@ -39,7 +45,7 @@ public class FaceInputActivity extends AppCompatActivity {
     private boolean lock = false;
     CameraPreview mPreview = null;
     private int id = 0;
-    private final int FINISH = 1;
+    private final int LOGIN = 1;
     private String feature = "";
     private String mode = "";
     private String user = "";
@@ -47,14 +53,15 @@ public class FaceInputActivity extends AppCompatActivity {
     private Handler resultHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
-            super.handleMessage(msg);
 
-            if (msg.what == FINISH) {
+            if (msg.what == LOGIN) {
                 if (mode.equals("login")){
+                    Log.i("mhy","before login");
                     if (login()){
                         Intent intent = new Intent(FaceInputActivity.this,MainActivity.class);
                         startActivity(intent);
                     } else {
+                        //todo:  提示
                         finish();
                     }
                 } else {
@@ -66,8 +73,60 @@ public class FaceInputActivity extends AppCompatActivity {
     };
 
     private boolean login(){
-        //todo:
-        return false;
+        Log.i("mhy","on login");
+        class myCallable implements Callable<String>{
+            @Override
+            public String call() throws Exception {
+                Log.i("mhy","login call");
+                String url = "http://" + Config.SERVER_HOST + ":" + Config.SERVER_PORT + Config.FACE_VALIDATE_URL;
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put("user_name",user);
+                    jsonObject.put("feature",feature);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                Request request = new Request.Builder()
+                        .url(url)
+                        .addHeader("Content-Type","application/json")
+                        .addHeader("Data-Type","text")
+                        .post(RequestBody.create(MediaType.parse("application/json;charset=utf-8"),jsonObject.toString()))
+                        .build();
+                OkHttpClient httpClient = new OkHttpClient();
+                Call call = httpClient.newCall(request);
+                try {
+                    //同步请求，要放到子线程执行
+                    Response response = call.execute();
+                    Log.i("mhy", "okHttpGet run: response:"+ response.body().string());
+                    if (response.code()==200){
+                        return "ok";
+                    } else {
+                        return "failed";
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return "failed";
+                }
+            }
+
+        }
+
+        FutureTask<String> futureTask = new FutureTask<String>(new myCallable());
+
+        new Thread(futureTask).start();
+        String result = "";
+        try {
+            result = futureTask.get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if (result.equals("ok")){
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private void register(){
@@ -122,15 +181,16 @@ public class FaceInputActivity extends AppCompatActivity {
                     try {
                         //同步请求，要放到子线程执行
                         Response response = call.execute();
-                        Log.i("mhy", "okHttpGet run: response:"+ response.body().string());
-                        feature = response.body().string();
-                        Message message = new Message();
-                        message.what = FINISH;
-                        resultHandler.sendMessage(message);
+                        String rs = response.body().string();
+                        Log.i("mhy", "okHttpGet run: response:"+ rs);
+                        feature = rs;
+
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-
+                    Message message = new Message();
+                    message.what = LOGIN;
+                    resultHandler.sendMessage(message);
 
                 }
             }).start();

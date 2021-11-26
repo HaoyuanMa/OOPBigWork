@@ -57,7 +57,7 @@ public class MainActivity extends Activity {
         Button btn4 =findViewById(R.id.btn4);
         btn4.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-
+                //todo：fix
                 System.exit(0);
             }
         });
