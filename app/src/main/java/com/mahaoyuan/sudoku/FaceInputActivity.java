@@ -49,6 +49,7 @@ public class FaceInputActivity extends AppCompatActivity {
     private String feature = "";
     private String mode = "";
     private String user = "";
+    private String password = "";
 
     private Handler resultHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -61,12 +62,33 @@ public class FaceInputActivity extends AppCompatActivity {
                         Intent intent = new Intent(FaceInputActivity.this,MainActivity.class);
                         startActivity(intent);
                     } else {
-                        //todo:  提示
-                        finish();
+                        ResultDialog resultDialog = new ResultDialog(mPreview.getContext(),"认证失败");
+                        resultDialog.show();
+                        Button resultBtn = resultDialog.findViewById(R.id.result_btn);
+                        resultBtn.setOnClickListener(v->{
+                            resultDialog.cancel();
+                            finish();
+                        });
                     }
                 } else {
-                    register();
-                    finish();
+                    if(!feature.isEmpty() && register()){
+                        ResultDialog resultDialog = new ResultDialog(mPreview.getContext(),"注册成功");
+                        resultDialog.show();
+                        Button resultBtn = resultDialog.findViewById(R.id.result_btn);
+                        resultBtn.setOnClickListener(v->{
+                            resultDialog.cancel();
+                            finish();
+                        });
+                    } else {
+                        ResultDialog resultDialog = new ResultDialog(mPreview.getContext(),"注册失败");
+                        resultDialog.show();
+                        Button resultBtn = resultDialog.findViewById(R.id.result_btn);
+                        resultBtn.setOnClickListener(v->{
+                            resultDialog.cancel();
+                            finish();
+                        });
+                    }
+
                 }
             }
         }
@@ -129,9 +151,65 @@ public class FaceInputActivity extends AppCompatActivity {
         }
     }
 
-    private void register(){
-       //todo:
+    private boolean register(){
+        Log.i("mhy","on register");
+        class mCallable implements Callable<String>{
+            @Override
+            public String call() throws Exception {
+                Log.i("mhy","register call");
+                String url = "http://" + Config.SERVER_HOST + ":" + Config.SERVER_PORT + Config.REGISTER_URL;
+                JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put("user_name",user);
+                    jsonObject.put("pass_word",password);
+                    jsonObject.put("feature",feature);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                Request request = new Request.Builder()
+                        .url(url)
+                        .addHeader("Content-Type","application/json")
+                        .addHeader("Data-Type","text")
+                        .post(RequestBody.create(MediaType.parse("application/json;charset=utf-8"),jsonObject.toString()))
+                        .build();
+                OkHttpClient httpClient = new OkHttpClient();
+                Call call = httpClient.newCall(request);
+                try {
+                    //同步请求，要放到子线程执行
+                    Response response = call.execute();
+                    Log.i("mhy", "okHttpGet run: response:"+ response.body().string());
+                    if (response.code()==200){
+                        return "ok";
+                    } else {
+                        return "failed";
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return "failed";
+                }
+            }
+
+        }
+
+        FutureTask<String> futureTask = new FutureTask<String>(new mCallable());
+
+        new Thread(futureTask).start();
+        String result = "";
+        try {
+            result = futureTask.get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if (result.equals("ok")){
+            return true;
+        } else {
+            return false;
+        }
     }
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,6 +219,7 @@ public class FaceInputActivity extends AppCompatActivity {
         Intent intent=getIntent();
         mode = intent.getStringExtra("mode");
         user = intent.getStringExtra("username");
+        password = intent.getStringExtra("password");
 
         mCamera = getCameraInstance();
         if (mCamera == null){

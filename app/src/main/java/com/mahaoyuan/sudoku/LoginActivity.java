@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -43,8 +45,15 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         Button loginButton = findViewById(R.id.login);
+        TextView register = findViewById(R.id.register);
         loginButton.setOnClickListener(v -> login());
+        register.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+            startActivity(intent);
+        });
     }
+
+
 
     private void login(){
         new Thread(new Runnable() {
