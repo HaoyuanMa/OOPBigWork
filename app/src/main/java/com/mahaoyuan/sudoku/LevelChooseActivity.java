@@ -12,7 +12,7 @@ import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
-public class LevelChooseActivity extends AppCompatActivity {
+public class LevelChooseActivity extends OfflineBaseActivity {
 
     private final View[] levels = new View[24];
     private float size;

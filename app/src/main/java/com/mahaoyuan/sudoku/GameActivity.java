@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-public class GameActivity extends AppCompatActivity {
+public class GameActivity extends OfflineBaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -38,7 +38,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class FaceInputActivity extends AppCompatActivity {
+public class FaceInputActivity extends OfflineBaseActivity {
 
     private Camera mCamera = null;
     private String res = "";

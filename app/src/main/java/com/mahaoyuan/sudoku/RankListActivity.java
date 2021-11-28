@@ -14,7 +14,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 
-public class RankListActivity extends AppCompatActivity {
+public class RankListActivity extends OfflineBaseActivity {
 
     private float width;
 
