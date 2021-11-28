@@ -18,6 +18,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -47,6 +49,7 @@ public class LoginActivity extends AppCompatActivity {
         Button loginButton = findViewById(R.id.login);
         TextView register = findViewById(R.id.register);
         loginButton.setOnClickListener(v -> login());
+
         register.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             startActivity(intent);
@@ -56,6 +59,17 @@ public class LoginActivity extends AppCompatActivity {
 
 
     private void login(){
+        Calendar date = Calendar.getInstance();
+        int hour = date.get(Calendar.HOUR_OF_DAY);
+        if (hour < Config.PLAY_TIME_START || hour >= Config.PLAY_TIME_END){
+            ResultDialog resultDialog = new ResultDialog(this,"不在游玩时间段");
+            resultDialog.show();
+            Button resultBtn = resultDialog.findViewById(R.id.result_btn);
+            resultBtn.setOnClickListener(v->{
+                resultDialog.cancel();
+            });
+            return;
+        }
         new Thread(new Runnable() {
             @Override
             public void run() {
